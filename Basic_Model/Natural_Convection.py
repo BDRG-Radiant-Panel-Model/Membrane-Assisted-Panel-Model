@@ -89,7 +89,7 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
         Gr_L = (g*B*(T_air - T_film)*(L**3))/(v**2)
         Pr = v/a
         Ra_L = Gr_L*Pr
-        n = 0.7
+        n = 3
         
         Re_L = (p*wind*panel_width)/u
         Nu_L_force=0.664*(Pr**(1/3))*(Re_L**(1/2))

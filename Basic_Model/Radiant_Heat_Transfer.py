@@ -4,51 +4,11 @@ import math
 import numpy as np
 
 
-def Wall_emissivity( T_cs, T_film, trans, absorb, wave_len2, E_cs):
-    
-    C1 = 3.741695*(10**8) #radiation contants for Planck's distribution
-    C2 = 1.438866*(10**4)
-    
-    E1_through_film = list(range(0, len(trans)))  #emissive power of cold surface per wavelength
-    E1_through_film_black = list(range(0, len(trans)))
-    for x in E1_through_film:
-        E1_through_film [x] = ((C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_cs))) -1)))*E_cs)*trans[x] #Emissive power/wavelength for blackbody
-        E1_through_film_black [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_cs))) -1)))*trans[x]
-    
-    E1_through_film_tot_wall=np.trapz(E1_through_film, wave_len2)
-    E1_through_film_black_tot_wall=np.trapz( E1_through_film_black, wave_len2)
-    
-    
-    E_film1 = list(range(0, len(trans)))  #emissive power of film per wavelength 
-    E_film_black1 = list(range(0, len(trans)))
-    #Creating spectral emissive power from cold panel
-    for x in E_film1:
-        E_film1 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))*absorb[x] 
-        E_film_black1 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))
-    
-    E_film2 = list(range(0, len(trans)))  #emissive power of film per wavelength 
-    E_film_black2 = list(range(0, len(trans)))
-    for x in E_film2:
-# =============================================================================
-#         E_film2 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))*absorb[x]*0.05*(1-absorb[x])
-#         E_film_black2 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))*0.05*(1-absorb[x])
-# =============================================================================
-        E_film2 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))*absorb[x]*0.05*(trans[x])
-        E_film_black2 [x] = (C1/((wave_len2[x]**5) * ((math.exp(C2/(wave_len2[x]*T_film))) -1)))*0.05*(trans[x])
-    
-    E_film_tot_wall1=np.trapz(E_film1, wave_len2)
-    E_film_black_tot_wall1=np.trapz(E_film_black1, wave_len2)
-    
-    E_film_tot_wall2=np.trapz(E_film2, wave_len2)
-    E_film_black_tot_wall2=np.trapz(E_film_black2, wave_len2)
-    
-    #Panel_emmisivity = (E_film_tot_wall1 + E1_through_film_tot_wall)/(E1_through_film_black_tot_wall + E_film_black_tot_wall1)
-    Panel_emmisivity = (E_film_tot_wall1 + E1_through_film_tot_wall+E_film_tot_wall2)/(E1_through_film_black_tot_wall + E_film_black_tot_wall1+E_film_black_tot_wall2)
 
-    return Panel_emmisivity, E_film_tot_wall1, E1_through_film_tot_wall, E_film_black_tot_wall1, E1_through_film_black_tot_wall
-
-
-
+def MRT_Panel(P1_Q_PanelOut, A_cs ):
+    boltz = (5.670374*10**(-8))    
+    T_panel1 = (P1_Q_PanelOut/(A_cs*boltz))**(1/4)  
+    return  T_panel1-273.15
 
 
 

@@ -1,6 +1,5 @@
-from Radiant_Heat_Transfer import Radiant_Transfer_absorption, Radiant_Transfer_emission
+from Radiant_Heat_Transfer import Radiant_Transfer_absorption, Radiant_Transfer_emission, MRT_Panel
 from Natural_Convection import Nat_Conv_PanelInterior, Nat_Conv_PanelExterior
-from MRT_Panel import MRT_Panel
 import math 
 import pandas as pd
 from decimal import Decimal
@@ -9,127 +8,71 @@ import numpy as np
 
 
 #model performance
-deltaT = 0.05
+deltaT = 0.05   #lower number will produce more precise results, but will increase run time
 orientation = 0 #0 for vertical panel, 1 for horizontal
 
 #Variables for multiple modes of heat transfer
 panel_height = 2.1  #[m]
 panel_width = 1.2   #[m]
 
+#model inputs, data obtained from Cold Tube experiment
 T_cs = [17.5, 8.1, 15.9, 10.6, 13.39, 13.7, 12, 14.67, 13.3] # [all temps in degrees C] Cold surface temperature 
 T_wall = [25.398, 19.037, 24.315, 20.729, 22.617, 22.826, 21.676, 23.483, 22.556] #Denon Regression - temperature of prticipating wall (MRT)
-#T_wall = [21.24, 15.074, 20.190, 16.714, 18.544, 18.747, 17.632, 19.384, 18.485] #Eric Regression - temperature of prticipating wall (MRT)
 T_air = [26.8, 31.1, 31.5, 30, 30.1, 29.3, 29.1, 29.46, 30.97] #air temperature surrounding the panel 
 RH = [0.8467, 0.6405, 0.7269, 0.6618, 0.7116, 0.7407, 0.7184, 0.7625, 0.7299]
 T_dew = [24, 23.5, 26, 23, 24.3, 24.2, 23.5, 24.84, 25.56]
 
-# =============================================================================
-# T_cs = [20.8, 15.0, 20.0, 25.0] # [all temps in degrees C] Cold surface temperature 
-# T_wall = [25, 27.0, 27.0, 27.0] #Denon Regression - temperature of prticipating wall (MRT)
-# #T_wall = [21.24, 15.074, 20.190, 16.714, 18.544, 18.747, 17.632, 19.384, 18.485] #Eric Regression - temperature of prticipating wall (MRT)
-# T_air = [24.8, 29.0, 29.0, 29.0] #air temperature surrounding the panel 
-# RH = [0.888, 0.8467, 0.8467, 0.8467]
-# T_dew = [24.0, 23.5, 26, 23]
-# =============================================================================
 
+
+#to sumulate using your own model inputs, comment out previus model input and uncomment below
 # =============================================================================
-# T_cs = [17.5] # [all temps in degrees C] Cold surface temperature 
-# T_wall = [25.398] #Denon Regression - temperature of prticipating wall (MRT)
-# #T_wall = [21.24, 15.074, 20.190, 16.714, 18.544, 18.747, 17.632, 19.384, 18.485] #Eric Regression - temperature of prticipating wall (MRT)
-# T_air = [26.8] #air temperature surrounding the panel 
-# RH = [0.8467]
-# T_dew = [24]
+# T_cs = [20.8]  
+# T_wall = [25]  
+# T_air = [24.8] 
+# RH = [0.888]
+# T_dew = [24.0]
 # =============================================================================
 
 
-wind = 0.3
 
 
 
-# =============================================================================
-# #Original Calibration
-# err_inc = 1.0
-# h_int_err = err_inc*0.6047
-# h_ext_err = err_inc*1.497
-# em_cs_err = err_inc
-# Trans_error = err_inc*0.899
-# T_cs_err = err_inc
-# T_ss_err = err_inc*1.018
-# T_air_err = err_inc
-# B_err = err_inc
-# u_err = err_inc
-# p_err = err_inc
-# a_err = err_inc
-# k_err_int = err_inc*0.9925
-# k_err_ext = err_inc*1.160
-# wind_err = err_inc
-# =============================================================================
-
-# =============================================================================
-#  #Test Calibrations
-# err_inc = 1.0
-# h_int_err = err_inc*0.929
-# h_ext_err = err_inc*1.179
-# em_cs_err = err_inc
-# Trans_error = err_inc*0.863
-# T_cs_err = err_inc
-# T_ss_err = err_inc*1.00
-# T_air_err = err_inc
-# B_err = err_inc
-# u_err = err_inc
-# p_err = err_inc
-# a_err = err_inc
-# k_err_int = err_inc
-# k_err_ext = err_inc*1.046
-# wind_err = err_inc*01.00
-# =============================================================================
 
 
+#Original Calibration
 err_inc = 1.0
-h_int_err = err_inc
-h_ext_err = err_inc
+h_int_err = err_inc*0.6047
+h_ext_err = err_inc*1.497
 em_cs_err = err_inc
-Trans_error = err_inc
+Trans_error = err_inc*0.899
 T_cs_err = err_inc
-T_ss_err = err_inc
+T_ss_err = err_inc*1.018
 T_air_err = err_inc
 B_err = err_inc
 u_err = err_inc
 p_err = err_inc
 a_err = err_inc
-k_err_int = err_inc
-k_err_ext = err_inc
+k_err_int = err_inc*0.9925
+k_err_ext = err_inc*1.160
 wind_err = err_inc
 
 
 
-
-
-# =============================================================================
-# T_cs = [17] # [all temps in degrees C] Cold surface temperature 
-# T_wall = [24] #Denon Regression - temperature of prticipating wall (MRT)
-# #T_wall = [21.24, 15.074, 20.190, 16.714, 18.544, 18.747, 17.632, 19.384, 18.485] #Eric Regression - temperature of prticipating wall (MRT)
-# T_air = [29] #air temperature surrounding the panel 
-# T_dew = [23.47]
-# =============================================================================
-
-
 #Variables for radiant heat transfer
 thick_film_2 = 0.00076 #thickness of the film for panel design [m]
-#E_wall = 0.75 #emissivity of participating wall (paint), leave commented 
-E_cs = 0.95 * em_cs_err #emissivity of cold surface
 
-thick_film_1 = 0.00076 # * Dont change unless data changes * thickness of film used for ftir data [m] 
+thick_film_1 = 0.00076 # * Dont change unless data changes * thickness of film used for ftir data [m]
+
+E_cs = 0.95 * em_cs_err #emissivity of cold surface 
 
 #Variables for convective heat transfer
 S = 0.15 #characteristic length (distance between cold panel and film [m])
+wind = 0.3 * wind_err
 
-wind = wind * wind_err
 #==============================================================================
 
 
 data1 = pd.read_excel (r"C:/Users/denon/Google Drive/1_Masters_Backup/Python Code/FTIR data/Edit-coldtubeT.xlsx") #reading in FTIR values from excel sheet
-#data1 = pd.read_excel (r'C:\Users\denon\Desktop\Python Code\FTIR data\Edit-coldtubeR&T-small-spectrum.xlsx') #reading in FTIR values from excel sheet
 trans1 = pd.DataFrame(data1, columns=['trans']) #seperating transmissivity data
 trans = list(range(0, len(trans1)))#creating list for transmissivity values  
 for x in trans:   #calculating new transmissivity for each wavelength
@@ -139,7 +82,6 @@ for x in trans:   #calculating new transmissivity for each wavelength
     else:
         trans[x]=0
 data2 = pd.read_excel (r"C:/Users/denon/Google Drive/1_Masters_Backup/Python Code/FTIR data/Edit-coldtubeR.xlsx") #reading in FTIR values from excel sheet
-#data2 = pd.read_excel (r'C:\Users\denon\Desktop\Python Code\FTIR data\Edit-coldtubeR&T-small-spectrum.xlsx') #reading in FTIR values from excel sheet
 reflect1 = pd.DataFrame(data2, columns=['ref']) #seperating reflectivity data
 reflect = list(range(0, len(reflect1)))#creating list for reflection values
 for x in reflect:
@@ -220,14 +162,6 @@ for y in T_cs:
     for x in energy_balance:  #the section that iterates through one variable combination to find the silution
         T_film[x] = T_cs[T_cs_counter] + (deltaT * x)
         
-# =============================================================================
-#         emm_panel_return = Wall_emissivity(T_cs[T_cs_counter], T_film [x], trans, absorb, wave_len2, E_cs) #this section returns values from the function that calculates the apperent emissivity of the whole panel observed from outside the panel
-#         e_wall[x] = emm_panel_return[0]
-#         wall_e_film [x] = emm_panel_return[1]
-#         wall_e_cs [x] = emm_panel_return[2]
-#         wall_e_film_black [x] = emm_panel_return[3]
-#         wall_e_cs_black [x] = emm_panel_return[4]
-# =============================================================================
         
         Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film[x], T_air[T_cs_counter], RH[T_cs_counter], orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext)
         Q1[x] = Conv_ext[0]
