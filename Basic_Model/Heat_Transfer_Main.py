@@ -72,7 +72,7 @@ wind = 0.3 * wind_err
 #==============================================================================
 
 
-data1 = pd.read_excel (r"C:/Users/denon/Google Drive/1_Masters_Backup/Python Code/FTIR data/Edit-coldtubeT.xlsx") #reading in FTIR values from excel sheet
+data1 = pd.read_excel (r"C:\Users\denon\Documents\GitHub\Membrane-Assisted-Panel-Model\Basic_Model\Transmission_Membrane_coldtube.xlsx") #reading in FTIR values from excel sheet
 trans1 = pd.DataFrame(data1, columns=['trans']) #seperating transmissivity data
 trans = list(range(0, len(trans1)))#creating list for transmissivity values  
 for x in trans:   #calculating new transmissivity for each wavelength
@@ -81,7 +81,7 @@ for x in trans:   #calculating new transmissivity for each wavelength
         trans[x] = Trans_error * math.exp(abs_cof_temp*thick_film_2)  #Beer's law again (broken up for debugging)      
     else:
         trans[x]=0
-data2 = pd.read_excel (r"C:/Users/denon/Google Drive/1_Masters_Backup/Python Code/FTIR data/Edit-coldtubeR.xlsx") #reading in FTIR values from excel sheet
+data2 = pd.read_excel (r"C:\Users\denon\Documents\GitHub\Membrane-Assisted-Panel-Model\Basic_Model\Reflection_Membrane_coldtube.xlsx") #reading in FTIR values from excel sheet
 reflect1 = pd.DataFrame(data2, columns=['ref']) #seperating reflectivity data
 reflect = list(range(0, len(reflect1)))#creating list for reflection values
 for x in reflect:
