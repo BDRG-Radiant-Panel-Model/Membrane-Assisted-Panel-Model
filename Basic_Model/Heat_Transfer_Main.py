@@ -11,16 +11,22 @@ import numpy as np
 deltaT = 0.05   #lower number will produce more precise results, but will increase run time
 orientation = 0 #0 for vertical panel, 1 for horizontal
 
-#Variables for multiple modes of heat transfer
+#Panel Paramaters
 panel_height = 2.1  #[m]
 panel_width = 1.2   #[m]
+S = 0.15 #characteristic length (distance between cold panel and film [m])
+thick_film_2 = 0.00076 #thickness of the film for panel design [m]
+E_cs = 0.95
 
-#model inputs, data obtained from Cold Tube experiment
+
+#Environmental Paramaters
 T_cs = [17.5, 8.1, 15.9, 10.6, 13.39, 13.7, 12, 14.67, 13.3] # [all temps in degrees C] Cold surface temperature 
 T_wall = [25.398, 19.037, 24.315, 20.729, 22.617, 22.826, 21.676, 23.483, 22.556] #Denon Regression - temperature of prticipating wall (MRT)
 T_air = [26.8, 31.1, 31.5, 30, 30.1, 29.3, 29.1, 29.46, 30.97] #air temperature surrounding the panel 
 RH = [0.8467, 0.6405, 0.7269, 0.6618, 0.7116, 0.7407, 0.7184, 0.7625, 0.7299]
-T_dew = [24, 23.5, 26, 23, 24.3, 24.2, 23.5, 24.84, 25.56]
+Real_Mem_Temp = [24, 23.5, 26, 23, 24.3, 24.2, 23.5, 24.84, 25.56]
+
+wind = 0.3
 
 
 
@@ -30,7 +36,9 @@ T_dew = [24, 23.5, 26, 23, 24.3, 24.2, 23.5, 24.84, 25.56]
 # T_wall = [25]  
 # T_air = [24.8] 
 # RH = [0.888]
-# T_dew = [24.0]
+# Real_Mem_Temp = [24.0]
+#
+# wind = 0.3
 # =============================================================================
 
 
@@ -59,15 +67,14 @@ wind_err = err_inc
 
 
 #Variables for radiant heat transfer
-thick_film_2 = 0.00076 #thickness of the film for panel design [m]
+
 
 thick_film_1 = 0.00076 # * Dont change unless data changes * thickness of film used for ftir data [m]
 
-E_cs = 0.95 * em_cs_err #emissivity of cold surface 
+E_cs = E_cs * em_cs_err #emissivity of cold surface 
 
 #Variables for convective heat transfer
-S = 0.15 #characteristic length (distance between cold panel and film [m])
-wind = 0.3 * wind_err
+wind = wind * wind_err
 
 #==============================================================================
 
@@ -214,15 +221,15 @@ for y in T_cs:
     
     print("--------------------------------------------------------------------")
     
-    print("Film Temperature:", round(T_film[min_energy_balance_location],3), "[K]",round(T_film[min_energy_balance_location]-273.15, 3), "[C]")
+    print("Membrane Temperature:", round(T_film[min_energy_balance_location],3), "[K]",round(T_film[min_energy_balance_location]-273.15, 3), "[C]")
  
-    print("Cooling power:",  round((cooling_part1[min_energy_balance_location]+ cooling_part2[min_energy_balance_location])/1000,3), "[kW]")
-    print("MRT Panel Temperature:",  Panel_temps[T_cs_counter], "[C]")
+    #print("Cooling power:",  round((cooling_part1[min_energy_balance_location]+ cooling_part2[min_energy_balance_location])/1000,3), "[W]")
+    print("Radiant Panel Temperature:",  Panel_temps[T_cs_counter], "[C]")
 
 
     print("")
-    print("Cold Surface Temperature:", round(T_cs[T_cs_counter],3), "[K]", round(T_cs[T_cs_counter]-273.15, 3), "[C]" )
-    print("Wall Temperature:", round(T_wall[T_cs_counter],3), "[K]", round(T_wall[T_cs_counter]-273.15, 3), "[C]")
+    print("Chilled Surface Temperature:", round(T_cs[T_cs_counter],3), "[K]", round(T_cs[T_cs_counter]-273.15, 3), "[C]" )
+    print("Surrounding Surface Temperature:", round(T_wall[T_cs_counter],3), "[K]", round(T_wall[T_cs_counter]-273.15, 3), "[C]")
     print("Air Temperature:", round(T_air[T_cs_counter],3), "[K]",round(T_air[T_cs_counter]-273.15, 3), "[C]")
     print("")
     print("Q1 (in) Natural Convection Panel Exterior:", round(Q1[min_energy_balance_location], 3), "W" )
@@ -257,7 +264,7 @@ for y in T_cs:
 All_film_temps_C = [round(float(x - 273.15),3) for x in All_film_temps]
 res_list = [] 
 for i in range(0, len(All_film_temps)): 
-        res_list_val = abs((All_film_temps[i]-273.15) - T_dew[i])
+        res_list_val = abs((All_film_temps[i]-273.15) - Real_Mem_Temp[i])
         res_list.append(res_list_val) 
 Temp_diff=  np.mean(res_list)
 print(All_film_temps_C)
