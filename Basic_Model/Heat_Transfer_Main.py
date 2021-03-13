@@ -44,10 +44,7 @@ wind = 0.3
 
 
 
-
-
-
-#Original Calibration
+#Calibration - vertical panel
 err_inc = 1.0
 h_int_err = err_inc*0.6047
 h_ext_err = err_inc*1.497
@@ -63,6 +60,26 @@ a_err = err_inc
 k_err_int = err_inc*0.9925
 k_err_ext = err_inc*1.160
 wind_err = err_inc
+
+
+# =============================================================================
+# #Horizontal panel
+# err_inc = 1.0
+# h_int_err = err_inc
+# h_ext_err = err_inc
+# em_cs_err = err_inc
+# Trans_error = err_inc
+# T_cs_err = err_inc
+# T_ss_err = err_inc
+# T_air_err = err_inc
+# B_err = err_inc
+# u_err = err_inc
+# p_err = err_inc
+# a_err = err_inc
+# k_err_int = err_inc
+# k_err_ext = err_inc
+# wind_err = err_inc
+# =============================================================================
 
 
 
