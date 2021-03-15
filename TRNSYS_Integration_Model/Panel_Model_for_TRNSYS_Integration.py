@@ -12,7 +12,7 @@ from pythermalcomfort.psychrometrics import t_o
 
 def PythonFunction():  
 
-  
+    #============These variables need to be set manually - Begin=================
         
     #model performance
     deltaT = 0.5
@@ -21,24 +21,26 @@ def PythonFunction():
     #Variables for multiple modes of heat transfer
     panel_height = 18  #[m]
     panel_width = 10   #[m]
-    insulation_thicknes = 0.15 #[m]
+
     
-    
-    A_cs = panel_height*panel_width #area of cold panel [m]
-    P_cs = (panel_height*2)+(panel_width*2) #perimeter of cold panel [m]
+    wind = 0.5 #air speed near panel m/s
+
     
     #Variables for convective heat transfer
     S = 0.2 #characteristic length (distance between cold panel and film [m])
     
+    Cp = 4.184 #[KJ/Kg] #changer heat capacity if the fluid flowing through the panel is no water
     
-    E_window = 0.02 #emissivity of windows
     
+    #These values are currently not incorperated into the model
+    E_window = 0.02 #emissivity of windows, this value is currently not used
+    insulation_thicknes = 0.15 #[m]   
     
-    Cp = 4.184 #[KJ/Kg]
+    #============These variables need to be set manually - End=================
     
     T_air1 = TRNSYS.getInputValue(1) #air temperature surrounding the panel
     RH1 = TRNSYS.getInputValue(2) #relative humidity %
-    DeHumid_Sched = TRNSYS.getInputValue(3) #wind speed
+    DeHumid_Sched = TRNSYS.getInputValue(3) 
     T_dewpoint1 = TRNSYS.getInputValue(4)
 
     
@@ -57,42 +59,44 @@ def PythonFunction():
     Occ_Schedual_input = TRNSYS.getInputValue(14) 
     Heatpump_temp_signal = TRNSYS.getInputValue(15)
     
-    wind = 0.5
 
-    
-# =============================================================================
-#     err_inc = 1.0
-#     h_int_err = err_inc*0.603
-#     h_ext_err = err_inc*1.499
-#     em_cs_err = err_inc
-#     Trans_error = err_inc*0.898
-#     #T_cs_err = err_inc
-#     T_ss_err = err_inc*1.019
-#     T_air_err = err_inc
-#     B_err = err_inc
-#     u_err = err_inc
-#     p_err = err_inc
-#     a_err = err_inc
-#     k_err_int = err_inc*0.993
-#     k_err_ext = err_inc*1.161
-#     #wind_err = err_inc
-# =============================================================================
-    
+   
     err_inc = 1.0
-    h_int_err = err_inc
-    h_ext_err = err_inc
+    h_int_err = err_inc*0.603
+    h_ext_err = err_inc*1.499
     em_cs_err = err_inc
-    Trans_error = err_inc
+    Trans_error = err_inc*0.898
     #T_cs_err = err_inc
-    T_ss_err = err_inc
+    T_ss_err = err_inc*1.019
     T_air_err = err_inc
     B_err = err_inc
     u_err = err_inc
     p_err = err_inc
     a_err = err_inc
-    k_err_int = err_inc
-    k_err_ext = err_inc
+    k_err_int = err_inc*0.993
+    k_err_ext = err_inc*1.161
     #wind_err = err_inc
+    
+# =============================================================================
+#     err_inc = 1.0
+#     h_int_err = err_inc
+#     h_ext_err = err_inc
+#     em_cs_err = err_inc
+#     Trans_error = err_inc
+#     #T_cs_err = err_inc
+#     T_ss_err = err_inc
+#     T_air_err = err_inc
+#     B_err = err_inc
+#     u_err = err_inc
+#     p_err = err_inc
+#     a_err = err_inc
+#     k_err_int = err_inc
+#     k_err_ext = err_inc
+#     #wind_err = err_inc
+# =============================================================================
+    
+    A_cs = panel_height*panel_width #area of cold panel [m]
+    P_cs = (panel_height*2)+(panel_width*2) #perimeter of cold panel [m]
     
     FTIR_out = FTIR()
     trans = FTIR_out[0]
