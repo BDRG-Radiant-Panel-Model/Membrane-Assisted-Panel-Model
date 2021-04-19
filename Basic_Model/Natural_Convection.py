@@ -19,7 +19,7 @@ def Nat_Conv_PanelInterior(A_cs, T_cs, T_film, S, orientation, panel_height, h_i
     #S = 0.2 #characteristic length (distance between panels [m])
     
     
-    Ra_S = (g*B*(T_film - T_cs)*(S**3))/(v*a)
+    Ra_S = (g*B*(abs(T_film - T_cs))*(S**3))/(v*a)
     Pr = v/a
     
     
@@ -51,9 +51,14 @@ def Nat_Conv_PanelInterior(A_cs, T_cs, T_film, S, orientation, panel_height, h_i
         
         
         
-        
+
     else:               #horizontal panel
-        Nu_L = 0.069*(Ra_S**(1/3))*(Pr**0.074)
+        
+        if  T_film >=  T_cs:
+            Nu_L = 0.069*(Ra_S**(1/3))*(Pr**0.074)
+                
+        else:
+            Nu_L = 1
         
     h_PanelInterior = (Nu_L*k/S)*h_int_err
     Q3_NCIn =  h_PanelInterior*A_cs*(T_cs - T_film) #Q3_NCIn = total heat transfer (W) Natural Convection Interior
@@ -63,7 +68,7 @@ def Nat_Conv_PanelInterior(A_cs, T_cs, T_film, S, orientation, panel_height, h_i
 
 
 
-def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext):
+def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, n_err):
     
     T_air = float(T_air)
     
@@ -86,10 +91,10 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
         
         
         L = panel_height #characteristic length
-        Gr_L = (g*B*(T_air - T_film)*(L**3))/(v**2)
+        Gr_L = (g*B*(abs(T_air - T_film))*(L**3))/(v**2)
         Pr = v/a
         Ra_L = Gr_L*Pr
-        n = 3
+        n = 1*n_err
         
         Re_L = (p*wind*panel_width)/u
         Nu_L_force=0.664*(Pr**(1/3))*(Re_L**(1/2))
@@ -98,42 +103,45 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
         Nu_L_nat = (0.825+   ((0.387*(Ra_L**(1/6)))  /   ((1+ ((0.492/Pr)**(9/16))    )**(8/27))))**2
         Nu_L=((Nu_L_nat**n)+(Nu_L_force**n))**(1/n)
         
-        if 0.99< abs(Nu_L/ Nu_L_force)<1.01:
-            Nu_L = Nu_L_force
-            
-        if 0.99< abs(Nu_L/ Nu_L_nat)<1.01:
-            Nu_L = Nu_L_nat            
+        if Nu_L_force != 0 and Nu_L_nat !=0:
+            if 0.99< abs(Nu_L/ Nu_L_force)<1.01:
+                Nu_L = Nu_L_force
+                
+            if 0.99< abs(Nu_L/ Nu_L_nat)<1.01:
+                Nu_L = Nu_L_nat            
         
-# =============================================================================
-#         #UHF
-#         Nu_L = 0.55 *  Ra_L**(1/5)
-# =============================================================================
 
 
     else: #horiztonal panel
         L = A_cs / P_cs #characteristic length
-        Gr_L = (g*B*(T_air - T_film)*(L**3))/(v**2)
+        Gr_L = (g*B*(abs(T_air - T_film))*(L**3))/(v**2)
         Pr = v/a
         Ra_L = Gr_L*Pr
         Re_L = 0
-        n = 3
+        n = 1*n_err
 
-
-        #UWT
-        if Ra_L<10**7:
-            Nu_L_nat = 0.54*Ra_L**0.25
+        if T_film<=T_air:
+            #UWT
+            if Ra_L<10**7:
+                Nu_L_nat = 0.54*Ra_L**0.25
+            else:
+                Nu_L_nat = 0.15*Ra_L**(1/3)
+                
         else:
-            Nu_L_nat = 0.15*Ra_L**(1/3)
+            Nu_L_nat = 0.27*Ra_L**0.25
+            
+            
         
         Re_L = (p*wind*panel_width)/u
         Nu_L_force=0.664*(Pr**(1/3))*(Re_L**(1/2))
         Nu_L=((Nu_L_nat**n)+(Nu_L_force**n))**(1/n)
         
-        if 0.99< abs(Nu_L/ Nu_L_force)<1.01:
-            Nu_L = Nu_L_force
+        if Nu_L_force != 0 and Nu_L_nat !=0:
+            if 0.99< abs(Nu_L/ Nu_L_force)<1.01:
+                Nu_L = Nu_L_force
             
-        if 0.99< abs(Nu_L/ Nu_L_nat)<1.01:
-            Nu_L = Nu_L_nat 
+            if 0.99< abs(Nu_L/ Nu_L_nat)<1.01:
+                Nu_L = Nu_L_nat 
       
 # =============================================================================
 #         #UHF

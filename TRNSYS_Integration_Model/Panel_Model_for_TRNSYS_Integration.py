@@ -141,8 +141,8 @@ def PythonFunction():
         x = 1
         #=====================Step 3: Calculate View Factors between panels and human============================================
         P1_Panel_toHumans_F = [0.00088, 0.00088, 0.00088, 0.00088, 0.0027]
-        total_Panel_toHumans_F = sum(P1_Panel_toHumans_F)*Occ_Schedual_input
-        ave_panel_toHumans = (total_Panel_toHumans_F/len(P1_Panel_toHumans_F))*Occ_Schedual_input
+        total_Panel_toHumans_F = 3*sum(P1_Panel_toHumans_F)*Occ_Schedual_input
+        ave_panel_toHumans = (total_Panel_toHumans_F/(3*len(P1_Panel_toHumans_F)))*Occ_Schedual_input
         ave_human_toPanels_F = ((ave_panel_toHumans*A_cs)/1.551)
          
          #===========================Step 3: End ======================================================================
@@ -659,7 +659,7 @@ def CS_temp (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_fi
 
 def MRT_Human(P1_Panel_toHumans_F,  P1_Q_PanelOut, T_wallN, T_wallS, T_wallE, T_wallW, T_wallF, T_wallR, A_cs, E_window):
     
-    F_hh = 15*0.00074 #average view fator from human to humans
+    F_hh = 14*0.00074 #average view fator from human to humans
 
     boltz = (5.670374*10**(-8))
     

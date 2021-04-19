@@ -14,9 +14,13 @@ orientation = 0 #0 for vertical panel, 1 for horizontal
 #Panel Paramaters
 panel_height = 2.1  #[m]
 panel_width = 1.2   #[m]
-S = 0.15 #characteristic length (distance between cold panel and film [m])
-thick_film_2 = 0.00076 #thickness of the film for panel design [m]
+#S = 0.15 #characteristic length (distance between cold panel and film [m])
+S = 1.5 #characteristic length (distance between cold panel and film [m])
+#thick_film_2 = 0.001 #thickness of the film for panel design [m]
+thick_film_2 = 0.001 #thickness of the film for panel design [m]
 E_cs = 0.95
+
+U_value_ins = 0.63 #W/m^2k
 
 
 #Environmental Paramaters
@@ -30,36 +34,61 @@ wind = 0.3
 
 
 
-#to sumulate using your own model inputs, comment out previus model input and uncomment below
 # =============================================================================
-# T_cs = [20.8]  
-# T_wall = [25]  
-# T_air = [24.8] 
+# #to sumulate using your own model inputs, comment out previus model input and uncomment below
+# T_cs = [50]  
+# T_wall = [0]  
+# T_air = [0] 
 # RH = [0.888]
 # Real_Mem_Temp = [24.0]
-#
-# wind = 0.3
+# 
+# wind = 0.8
 # =============================================================================
 
 
 
 
-#Calibration - vertical panel
+# =============================================================================
+# #Calibration - vertical panel - orig
+# err_inc = 1.0
+# h_int_err = err_inc*0.6047
+# h_ext_err = err_inc*1.497
+# em_cs_err = err_inc
+# Trans_error = err_inc*0.899
+# T_cs_err = err_inc
+# T_ss_err = err_inc*1.018
+# T_air_err = err_inc
+# B_err = err_inc
+# u_err = err_inc
+# p_err = err_inc
+# a_err = err_inc
+# k_err_int = err_inc*0.9925
+# k_err_ext = err_inc*1.160
+# wind_err = err_inc
+# n_err = 3
+# =============================================================================
+
+
+#Calibration - vertical panel - new
 err_inc = 1.0
-h_int_err = err_inc*0.6047
-h_ext_err = err_inc*1.497
+h_int_err = err_inc*0.981474747
+h_ext_err = err_inc*1.082080808
 em_cs_err = err_inc
-Trans_error = err_inc*0.899
+Trans_error = err_inc*0.864969697
 T_cs_err = err_inc
-T_ss_err = err_inc*1.018
+T_ss_err = err_inc*1.013050505
 T_air_err = err_inc
 B_err = err_inc
 u_err = err_inc
 p_err = err_inc
 a_err = err_inc
-k_err_int = err_inc*0.9925
-k_err_ext = err_inc*1.160
+k_err_int = err_inc
+k_err_ext = err_inc*1.039676768
 wind_err = err_inc
+n_err = 0.705393939
+
+
+
 
 
 # =============================================================================
@@ -79,14 +108,14 @@ wind_err = err_inc
 # k_err_int = err_inc
 # k_err_ext = err_inc
 # wind_err = err_inc
+# n_err = 3
 # =============================================================================
-
 
 
 #Variables for radiant heat transfer
 
 
-thick_film_1 = 0.00076 # * Dont change unless data changes * thickness of film used for ftir data [m]
+thick_film_1 = 0.00005 # * Dont change unless data changes * thickness of film used for ftir data [m]
 
 E_cs = E_cs * em_cs_err #emissivity of cold surface 
 
@@ -138,17 +167,33 @@ NaturalConvectionPanelinterior = list(range(0, len(T_cs)))
 All_Conv_ext_h= list(range(0, len(T_cs)))
 All_Conv_int_h= list(range(0, len(T_cs)))
 Panel_temps =  list(range(0, len(T_cs)))
+Rear_Conduction =  list(range(0, len(T_cs)))
 
 
 for y in T_cs:
 
 
-    if T_wall[T_cs_counter] > T_air[T_cs_counter]: #deciding what range of potential film temperatures need to be iterated through
+    if T_wall[T_cs_counter] >= T_air[T_cs_counter] and T_wall[T_cs_counter] >= T_cs[T_cs_counter]: #deciding what range of potential film temperatures need to be iterated through
         temp_high = T_wall[T_cs_counter]
-    else:
+   
+    elif T_air[T_cs_counter] >= T_wall[T_cs_counter] and T_air[T_cs_counter] >= T_cs[T_cs_counter]:
         temp_high = T_air[T_cs_counter]
+        
+    else :
+        temp_high = T_cs[T_cs_counter]
     
-    resolution = int((temp_high-T_cs[T_cs_counter])/deltaT) #higher number means more precise temperature but takes longer
+    
+    if T_wall[T_cs_counter] <= T_air[T_cs_counter] and T_wall[T_cs_counter] <= T_cs[T_cs_counter]: #deciding what range of potential film temperatures need to be iterated through
+        temp_low = T_wall[T_cs_counter]
+   
+    elif T_air[T_cs_counter] <= T_wall[T_cs_counter] and T_air[T_cs_counter] <= T_cs[T_cs_counter]:
+        temp_low = T_air[T_cs_counter]
+        
+    else:
+        temp_low = T_cs[T_cs_counter]
+        
+    
+    resolution = int((temp_high-temp_low)/deltaT) #higher number means more precise temperature but takes longer
     
     T_film = list(range(resolution)) #each of these lists are for storing data for one combination of variales, it gets reset after each combination has been iterated
     energy_balance = list(range(resolution))
@@ -184,10 +229,10 @@ for y in T_cs:
     min_energy_balance = 10000 #just setting it to a large number, the combination that minamizes this value is the solution
     
     for x in energy_balance:  #the section that iterates through one variable combination to find the silution
-        T_film[x] = T_cs[T_cs_counter] + (deltaT * x)
+        T_film[x] = temp_low + (deltaT * x)
         
         
-        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film[x], T_air[T_cs_counter], RH[T_cs_counter], orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext)
+        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film[x], T_air[T_cs_counter], RH[T_cs_counter], orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, n_err)
         Q1[x] = Conv_ext[0]
         Conv_ext_Ra[x] = Conv_ext[1]
         Pr_val [x]=Conv_ext[2]
@@ -236,6 +281,8 @@ for y in T_cs:
     All_Conv_ext_h [T_cs_counter] = round(h_ext[min_energy_balance_location],3)
     All_Conv_int_h [T_cs_counter] = round(h_int[min_energy_balance_location], 3)  
     
+    Rear_Conduction [T_cs_counter] = U_value_ins*A_cs*abs(T_cs[T_cs_counter]-T_air[T_cs_counter])
+    
     print("--------------------------------------------------------------------")
     
     print("Membrane Temperature:", round(T_film[min_energy_balance_location],3), "[K]",round(T_film[min_energy_balance_location]-273.15, 3), "[C]")
@@ -259,6 +306,8 @@ for y in T_cs:
     print("Q netroom Conv-cooling:", round(Q1[min_energy_balance_location], 3), "W" )
     print("Q cold surface:", round(ColdSurface_Q, 3), "W" )
     print("Q %rad:", round((Q_netroom_rad/(Q_netroom_rad+Q1[min_energy_balance_location]))*100, 3), "W" )
+    print("Q rear conduction:", round(Rear_Conduction [T_cs_counter], 3), "W" )
+    
     print("")
     print("film emissivity:", round( film_emissivity [min_energy_balance_location], 3))
     print("film transmissivity:", round(Rad_abs[7], 3))
