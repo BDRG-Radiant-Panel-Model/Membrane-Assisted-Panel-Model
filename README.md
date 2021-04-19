@@ -4,7 +4,7 @@ This project looks to give engineers and researchers the ability to estimate the
 
 ## Description
 
-For a full project description, followe link below:
+For a full project description, follow  link below:
 
 * [Home](https://github.com/BDRG-Radiant-Panel-Model/Membrane-Assisted-Panel-Model/wiki)
 
@@ -21,9 +21,12 @@ Installation instructions for the Python/TRNSYS model can be found here:
 
 ## Usage
 
-SImmilarely, information on using the two models can be found at the following links:
+Similarly, information on using the two models can be found at the following links:
 
 * [Py only Usage](https://github.com/BDRG-Radiant-Panel-Model/Membrane-Assisted-Panel-Model/wiki/%22Base-Model%22-Usage)
 * [Py/TRNSYS Usage](https://github.com/BDRG-Radiant-Panel-Model/Membrane-Assisted-Panel-Model/wiki/%22BPS-Model%22-Usage)
 
+## Support
+
+To contact me, please post in the discussion section
 
