@@ -17,7 +17,7 @@ panel_width = 1.2   #[m]
 #S = 0.15 #characteristic length (distance between cold panel and film [m])
 S = 1.5 #characteristic length (distance between cold panel and film [m])
 #thick_film_2 = 0.001 #thickness of the film for panel design [m]
-thick_film_2 = 0.001 #thickness of the film for panel design [m]
+thick_film_2 = 0.00005 #thickness of the film for panel design [m]
 E_cs = 0.95
 
 U_value_ins = 0.63 #W/m^2k
@@ -166,8 +166,11 @@ NaturalConvectionPanelinterior = list(range(0, len(T_cs)))
 
 All_Conv_ext_h= list(range(0, len(T_cs)))
 All_Conv_int_h= list(range(0, len(T_cs)))
+All_K_ext= list(range(0, len(T_cs)))
 Panel_temps =  list(range(0, len(T_cs)))
 Rear_Conduction =  list(range(0, len(T_cs)))
+All_Trans =  list(range(0, len(T_cs)))
+
 
 
 for y in T_cs:
@@ -216,6 +219,7 @@ for y in T_cs:
     cooling_part2= list(range(resolution))
     h_int= list(range(resolution))
     h_ext= list(range(resolution))
+    K_ext_Re= list(range(resolution))
     
     Q_radEmi_cs = list(range(resolution))
     Q_radAbs_cs = list(range(resolution))
@@ -238,6 +242,7 @@ for y in T_cs:
         Pr_val [x]=Conv_ext[2]
         h_ext[x] = Conv_ext[3]
         Conv_ext_Re[x]=Conv_ext[4]
+        K_ext_Re[x]=Conv_ext[5]
         
         Rad_abs = Radiant_Transfer_absorption (A_cs, T_cs[T_cs_counter], T_wall[T_cs_counter], trans, absorb, wave_len2, E_cs, reflect)
         Q2[x] = Rad_abs[0]
@@ -279,7 +284,10 @@ for y in T_cs:
     NaturalConvectionPanelinterior [T_cs_counter] = -1*round(Q3[min_energy_balance_location], 3)
     
     All_Conv_ext_h [T_cs_counter] = round(h_ext[min_energy_balance_location],3)
-    All_Conv_int_h [T_cs_counter] = round(h_int[min_energy_balance_location], 3)  
+    All_Conv_int_h [T_cs_counter] = round(h_int[min_energy_balance_location], 3)    
+    All_Trans [T_cs_counter] =  round(Rad_abs[7], 3)
+    All_K_ext[T_cs_counter] =  round(K_ext_Re[min_energy_balance_location], 3) 
+
     
     Rear_Conduction [T_cs_counter] = U_value_ins*A_cs*abs(T_cs[T_cs_counter]-T_air[T_cs_counter])
     
@@ -340,7 +348,7 @@ workbook = xlsxwriter.Workbook('Heat_Transfer_Output.xlsx')
 worksheet = workbook.add_worksheet() 
 bold = workbook.add_format({'bold': 1})
 
-headings = ['T_film', 'T_cs', 'net_Q',  'Rad-cooling', 'CS-Radgain-other', 'Q_NatConv_Interior', 'ext h', 'int h']
+headings = ['T_film', 'T_cs', 'net_Q',  'Rad-cooling', 'CS-Radgain-other', 'Q_NatConv_Interior', 'ext h', 'int h', 'Trans', 'T_ss', 'K ext']
 
 worksheet.write_row('A1', headings, bold)
 worksheet.write_column('A2', All_film_temps_C)
@@ -353,4 +361,7 @@ worksheet.write_column('F2', NaturalConvectionPanelinterior)
 
 worksheet.write_column('G2', All_Conv_ext_h)
 worksheet.write_column('H2', All_Conv_int_h)
+worksheet.write_column('I2', All_Trans)
+worksheet.write_column('J2', T_wall)
+worksheet.write_column('K2', All_K_ext)
 workbook.close() 

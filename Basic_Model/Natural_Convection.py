@@ -155,7 +155,7 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
     h_PanelExterior = (Nu_L*k/L)*h_ext_err
     Q1_NCEx =  h_PanelExterior*A_cs*(T_air - T_film) #Q1_NCEx = total heat transfer (W) Natural Convection Exterior
     
-    return Q1_NCEx, Ra_L, Pr, h_PanelExterior, Re_L
+    return Q1_NCEx, Ra_L, Pr, h_PanelExterior, Re_L, k
 
 
 

@@ -12,7 +12,7 @@ from pythermalcomfort.psychrometrics import t_o
 
 def PythonFunction():  
 
-    #============These variables need to be set manually - Begin=================
+  
         
     #model performance
     deltaT = 0.5
@@ -21,26 +21,24 @@ def PythonFunction():
     #Variables for multiple modes of heat transfer
     panel_height = 18  #[m]
     panel_width = 10   #[m]
-
+    insulation_thicknes = 0.15 #[m]
     
-    wind = 0.5 #air speed near panel m/s
-
+    
+    A_cs = panel_height*panel_width #area of cold panel [m]
+    P_cs = (panel_height*2)+(panel_width*2) #perimeter of cold panel [m]
     
     #Variables for convective heat transfer
     S = 0.2 #characteristic length (distance between cold panel and film [m])
     
-    Cp = 4.184 #[KJ/Kg] #changer heat capacity if the fluid flowing through the panel is no water
+    
+    E_window = 0.02 #emissivity of windows
     
     
-    #These values are currently not incorperated into the model
-    E_window = 0.02 #emissivity of windows, this value is currently not used
-    insulation_thicknes = 0.15 #[m]   
-    
-    #============These variables need to be set manually - End=================
+    Cp = 4.184 #[KJ/Kg]
     
     T_air1 = TRNSYS.getInputValue(1) #air temperature surrounding the panel
     RH1 = TRNSYS.getInputValue(2) #relative humidity %
-    DeHumid_Sched = TRNSYS.getInputValue(3) 
+    DeHumid_Sched = TRNSYS.getInputValue(3) #wind speed
     T_dewpoint1 = TRNSYS.getInputValue(4)
 
     
@@ -59,23 +57,25 @@ def PythonFunction():
     Occ_Schedual_input = TRNSYS.getInputValue(14) 
     Heatpump_temp_signal = TRNSYS.getInputValue(15)
     
+    wind = 0.5
 
-   
+    
     err_inc = 1.0
-    h_int_err = err_inc*0.603
-    h_ext_err = err_inc*1.499
+    h_int_err = err_inc*0.981474747
+    h_ext_err = err_inc*1.082080808
     em_cs_err = err_inc
-    Trans_error = err_inc*0.898
-    #T_cs_err = err_inc
-    T_ss_err = err_inc*1.019
+    Trans_error = err_inc*0.864969697
+    T_cs_err = err_inc
+    T_ss_err = err_inc*1.013050505
     T_air_err = err_inc
     B_err = err_inc
     u_err = err_inc
     p_err = err_inc
     a_err = err_inc
-    k_err_int = err_inc*0.993
-    k_err_ext = err_inc*1.161
-    #wind_err = err_inc
+    k_err_int = err_inc
+    k_err_ext = err_inc*1.039676768
+    wind_err = err_inc
+    n_err = 0.705393939
     
 # =============================================================================
 #     err_inc = 1.0
@@ -94,9 +94,6 @@ def PythonFunction():
 #     k_err_ext = err_inc
 #     #wind_err = err_inc
 # =============================================================================
-    
-    A_cs = panel_height*panel_width #area of cold panel [m]
-    P_cs = (panel_height*2)+(panel_width*2) #perimeter of cold panel [m]
     
     FTIR_out = FTIR()
     trans = FTIR_out[0]
@@ -120,7 +117,7 @@ def PythonFunction():
 
     average_wall_temp = (T_wallN + T_wallS +T_wallE +T_wallW +T_wallF +T_wallR )/6
     
-    path = r"C:\Users\denon\Google Drive\1_Masters_Backup\Python Code\Daily_Temps\Singapore_ave_daily_temp.csv"
+    path = r"D:\Masters related\Python Code\Daily_Temps\Singapore_ave_daily_temp.csv"
     file = open(path, newline='')
     reader = csv.reader(file)
     Ave_Temp = []
@@ -171,14 +168,14 @@ def PythonFunction():
         
         #u_val = (3*(insulation_thicknes**2))-(1.82*insulation_thicknes)+0.34 #[W/m^2-k]
         
-        Panel1_model1 = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, 10+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int)
+        Panel1_model1 = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, 10+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err)
         #Panel1_model1_Qdot_throughins = (u_val*A_cs*(T_wallR-15))/1000
-        Panel1_model1_Q =   Panel1_model1[3]/1000
+        Panel1_model1_Q =   (Panel1_model1[0]+Panel1_model1[4])/1000
         t1_in = 10-(Panel1_model1_Q/(2*mass_flow_rate*Cp))   
-        Panel1_model2 = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, 5+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int)
+        Panel1_model2 = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, 5+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err)
         #Panel1_model2_Qdot_throughins = (u_val*A_cs*(T_wallR-10))/1000
-        Panel1_model2_Q =   Panel1_model2[3]/1000 
-        t2_in = 5-(Panel1_model2_Q/(2*mass_flow_rate*Cp))  
+        Panel1_model2_Q =   (Panel1_model2[0]+Panel1_model2[4])/1000 
+        t2_in = 5-(Panel1_model2_Q/(2*mass_flow_rate*Cp))   
         
 
                           
@@ -190,7 +187,7 @@ def PythonFunction():
          
         P1_T_cs1 = (P1_T_inlet_t_cs_equ[0]*T_inlet1)+P1_T_inlet_t_cs_equ[1]
         P1_T_cs = P1_T_cs1 + 273.15
-        FTaQ_results = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, P1_T_cs, P1_T_wall_no_H, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int)    
+        FTaQ_results = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, P1_T_cs, P1_T_wall_no_H, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err)    
         P1_Q_Panel_empty_room1 = FTaQ_results[0]
         P1_Q_film_room = FTaQ_results[4]
         
@@ -211,7 +208,7 @@ def PythonFunction():
         
   
 
-        P1_Q_PanelHuman_results = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, P1_T_cs, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int)    
+        P1_Q_PanelHuman_results = film_temp_and_Q(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, P1_T_cs, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err)    
         P1_Q_PanelOut = P1_Q_PanelHuman_results[2]
         P1_T_film1 = FTaQ_results[1]-273.15
     
@@ -251,13 +248,14 @@ def PythonFunction():
         ADAPT_MAX = min(adapt_result_up)
         #ADAPT_temp_goal = sum(adapt_result_temp)/len(adapt_result_temp)
 
+        max_HUMAN_MRT = max(H_MRT)
         AVE_HUMAN_MRT = sum(H_MRT)/len(H_MRT)
         Panel_MRT_Temp = sum(panel_MRT_temp)/len(panel_MRT_temp)
         
         
         AVE_Q_human_panel = sum(Q_human_panel)/len(Q_human_panel)
         
-        operative_temp = t_o(T_air1, AVE_HUMAN_MRT, wind)
+        operative_temp = t_o(T_air1, max_HUMAN_MRT, wind)
 
         #=================Step 5 & 6: End ====================================================================== 
         
@@ -286,7 +284,7 @@ def PythonFunction():
 #             T_dewpoint1 = 15
 # =============================================================================
             
-        T_cs_results = CS_temp(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_dewpoint1+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int)
+        T_cs_results = CS_temp(orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_dewpoint1+273.15, P1_T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err)
         Panel_inlet_temp_set = (T_cs_results[1]+2)-273.15
         
     
@@ -299,26 +297,20 @@ def PythonFunction():
 
         
         
-        ##Leave for Debugging
 # =============================================================================
+#         ##Leave for Debugging
 #         rad_control = 0 
 #         operative_temp = 20
 #         AVE_HUMAN_MRT = 30
 #         P1_Q_room_gain = 0
 #         panelflow_cont_var = 0
-# =============================================================================
-# =============================================================================
 #         P1_Q_film_room = 0
-# =============================================================================
-# =============================================================================
 #         ADAPT_MIN = 0
 #         P1_T_outlet1 = T_inlet1
 #         P2_T_outlet1 = T_inlet1 
 #         T_outlet1_ave = T_inlet1
 #         P1_T_cs1 = T_inlet1
 #         T_film1_low = 0
-# =============================================================================
-# =============================================================================
 #         ave_human_toPanels_F = 0
 #         controlled_variable = 0
 #         heatpump_divert_control = 0.5
@@ -389,6 +381,7 @@ def PythonFunction():
     TRNSYS.setOutputValue(24, AVE_HUMAN_MRT) 
     
 # =============================================================================
+#   Not official
 #     P1_Panel_toHumans_F = [0.00088, 0.00088, 0.00088, 0.00088, 0.0028]
 #     total_Panel_toHumans_F = sum(P1_Panel_toHumans_F)*Occ_Schedual_input
 #     ave_panel_toHumans = (total_Panel_toHumans_F/len(P1_Panel_toHumans_F))*Occ_Schedual_input
@@ -464,7 +457,7 @@ def Panel_MRT(T_F, T_N, T_S, T_E, T_W,  E_window, total_Panel_toHumans_F):
     return P1_mrt
 
 
-def film_temp_and_Q (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_cs, T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int):
+def film_temp_and_Q (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_cs, T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err):
           
 
 
@@ -498,7 +491,7 @@ def film_temp_and_Q (orientation, panel_height, panel_width, S, A_cs, P_cs, delt
         T_film[x] = T_cs + (deltaT * x)
         
         
-        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film[x], T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext)
+        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film[x], T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, n_err)
         Q1[x] = Conv_ext[0]
 
         
@@ -538,7 +531,7 @@ def film_temp_and_Q (orientation, panel_height, panel_width, S, A_cs, P_cs, delt
 
 
 
-def CS_temp (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_film, T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int):
+def CS_temp (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_film, T_wall, T_air, RH,  E_cs, wind, trans, reflect, absorb, wave_len2,  h_int_err, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, k_err_int, n_err):
           
 
 
@@ -567,7 +560,7 @@ def CS_temp (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_fi
         T_cs[x] = 273.15 + (deltaT * x)
         
         
-        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext)
+        Conv_ext = Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err_ext, n_err)
         Q1[x] = Conv_ext[0]
 
         
@@ -659,7 +652,7 @@ def CS_temp (orientation, panel_height, panel_width, S, A_cs, P_cs, deltaT, T_fi
 
 def MRT_Human(P1_Panel_toHumans_F,  P1_Q_PanelOut, T_wallN, T_wallS, T_wallE, T_wallW, T_wallF, T_wallR, A_cs, E_window):
     
-    F_hh = 14*0.00074 #average view fator from human to humans
+    F_hh = 15*0.00074 #average view fator from human to humans
 
     boltz = (5.670374*10**(-8))
     
@@ -694,10 +687,10 @@ def MRT_Human(P1_Panel_toHumans_F,  P1_Q_PanelOut, T_wallN, T_wallS, T_wallE, T_
 
 
 def FTIR():  
-    thick_film_2 = 0.00076
-    thick_film_data = 0.00076 # * Dont change unless data changes * thickness of film used for ftir data [m] 
+    thick_film_2 = 0.005
+    thick_film_data = 0.00005 # * Dont change unless data changes * thickness of film used for ftir data [m] 
     
-    path = r"C:\Users\denon\Google Drive\1_Masters_Backup\Python Code\FTIR data\csv_files\Edit-coldtubeT.csv"
+    path = r"D:\Masters related\Python Code\FTIR data\csv_files\Edit-coldtubeT.csv"
     file = open(path, newline='')
     reader = csv.reader(file)
     trans = []
@@ -713,7 +706,7 @@ def FTIR():
         
         
     
-    path = r"C:\Users\denon\Google Drive\1_Masters_Backup\Python Code\FTIR data\csv_files\Edit-coldtubeR.csv"
+    path = r"D:\Masters related\Python Code\FTIR data\csv_files\Edit-coldtubeR.csv"
     file = open(path, newline='')
     reader = csv.reader(file)
     reflect = []
@@ -789,7 +782,7 @@ def Nat_Conv_PanelInterior(A_cs, T_cs, T_film, S, orientation, panel_height, h_i
 
 
 
-def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err):
+def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_height, panel_width, wind, h_ext_err, B_err, u_err, p_err, a_err, k_err, n_err):
     
     vert_horiz_conversion = 2.032*((abs(T_film-T_air))**(-0.159))
     
@@ -817,25 +810,22 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
         Gr_L = abs((g*B*(T_air - T_film)*(L**3))/(v**2))
         Pr = v/a
         Ra_L = Gr_L*Pr
+        n = 1*n_err
         
         Re_L = (p*wind*panel_width)/u
         Nu_L_force=0.664*(Pr**(1/3))*(Re_L**(1/2))
         
         #UWT
         Nu_L_nat = (0.825+   ((0.387*(Ra_L**(1/6)))  /   ((1+ ((0.492/Pr)**(9/16))    )**(8/27))))**2
-        Nu_L=((Nu_L_nat**0.7)+(Nu_L_force**0.7))**(1/0.7)
+        Nu_L=((Nu_L_nat**n)+(Nu_L_force**n))**(1/n)
         
-# =============================================================================
-#         #UHF
-#         Nu_L = 0.55 *  Ra_L**(1/5)
-# =============================================================================
-
 
     else: #horiztonal panel
         L = A_cs / P_cs #characteristic length
         Gr_L = abs((g*B*(T_air - T_film)*(L**3))/(v**2))
         Pr = v/a
         Ra_L = Gr_L*Pr
+        n = 1*n_err
       
         
         panel_width = (panel_width+panel_height)/2
@@ -848,15 +838,8 @@ def Nat_Conv_PanelExterior(A_cs, P_cs, T_film, T_air, RH, orientation, panel_hei
         else:
             Nu_L_nat = 0.15*Ra_L**(1/3)
             
-        Nu_L=((Nu_L_nat**3)+(Nu_L_force**3))**(1/3)
+        Nu_L=((Nu_L_nat**n)+(Nu_L_force**n))**(1/n)
       
-# =============================================================================
-#         #UHF
-#         if Ra_L>5*10**8:  
-#             0.13*Ra_L**(1/3)
-#         if Ra_L<5*10**8:
-#             0.16*Ra_L**(1/3)
-# =============================================================================
 
         
     h_PanelExterior = vert_horiz_conversion*(Nu_L*k/L)*h_ext_err
