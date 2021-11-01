@@ -440,7 +440,7 @@ def PythonFunction():
 
 def Panel_MRT(T_F, T_N, T_S, T_E, T_W,  E_window, total_Panel_toHumans_F): 
     
-    P1_toWalls_F = [0.1088, 0.1088, 0.0416, 0.0416, .699 - total_Panel_toHumans_F , .062, .062] #Panel 1 to walls. North, South, East, West, Floor, window1, window2
+    P1_toWalls_F = [0.1088, 0.1088, 0.0416, 0.0416, .699 - total_Panel_toHumans_F] #Panel 1 to walls. North, South, East, West, Floor, window1, window2
 
     T_F = T_F + 273.15
     T_N = T_N + 273.15
